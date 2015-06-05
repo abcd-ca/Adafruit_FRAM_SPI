@@ -68,12 +68,14 @@ class Adafruit_FRAM_SPI {
   void     getDeviceID(uint8_t *manufacturerID, uint16_t *productID);
   uint8_t  getStatusRegister(void);
   void     setStatusRegister(uint8_t value);
+  uint8_t  getAddressLengthInBytes(void);
+  void     setAddressLengthInBytes(uint8_t value);
 
  private:
   uint8_t  SPItransfer(uint8_t x);
 
   boolean _framInitialised;
-  int8_t _cs, _clk, _mosi, _miso;
+  int8_t _cs, _clk, _mosi, _miso, _addressLengthInBytes;
 };
 
 #endif

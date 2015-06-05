@@ -36,6 +36,7 @@ Adafruit_FRAM_SPI::Adafruit_FRAM_SPI(int8_t cs)
   _cs = cs;
   _clk = _mosi = _miso = -1;
   _framInitialised = false;
+  _addressLengthInBytes = 2;
 }
 
 Adafruit_FRAM_SPI::Adafruit_FRAM_SPI(int8_t clk, int8_t miso, int8_t mosi, int8_t cs) 
@@ -47,6 +48,18 @@ Adafruit_FRAM_SPI::Adafruit_FRAM_SPI(int8_t clk, int8_t miso, int8_t mosi, int8_
 /*========================================================================*/
 /*                           PUBLIC FUNCTIONS                             */
 /*========================================================================*/
+
+// Chips with larger capacity use 3-byte addresses vs 2-Byte addresses for smaller chips (default)
+// if your chip uses 3-byte memory addresses call setAddressLengthInBytes(3) before trying to reado or write
+uint8_t Adafruit_FRAM_SPI::getAddressLengthInBytes(void)
+{
+  return _addressLengthInBytes;
+}
+
+void Adafruit_FRAM_SPI::setAddressLengthInBytes(uint8_t value)
+{
+  _addressLengthInBytes = value;
+}
 
 /**************************************************************************/
 /*!
@@ -135,7 +148,8 @@ void Adafruit_FRAM_SPI::write8 (uint16_t addr, uint8_t value)
 {
   digitalWrite(_cs, LOW);
   SPItransfer(OPCODE_WRITE);
-  SPItransfer((uint8_t)(addr >> 8));
+  if(_addressLengthInBytes > 2) SPItransfer((uint8_t)((addr >> 16) & 0xFF));
+  if(_addressLengthInBytes > 1) SPItransfer((uint8_t)((addr >> 8) & 0xFF));
   SPItransfer((uint8_t)(addr & 0xFF));
   SPItransfer(value);
   /* CS on the rising edge commits the WRITE */
@@ -158,7 +172,8 @@ void Adafruit_FRAM_SPI::write (uint16_t addr, const uint8_t *values, size_t coun
 {
   digitalWrite(_cs, LOW);
   SPItransfer(OPCODE_WRITE);
-  SPItransfer((uint8_t)(addr >> 8));
+  if(_addressLengthInBytes > 2) SPItransfer((uint8_t)((addr >> 16) & 0xFF));
+  if(_addressLengthInBytes > 1) SPItransfer((uint8_t)((addr >> 8) & 0xFF));
   SPItransfer((uint8_t)(addr & 0xFF));
   for (int i = 0; i < count; i++)
   {
@@ -182,7 +197,8 @@ uint8_t Adafruit_FRAM_SPI::read8 (uint16_t addr)
 {
   digitalWrite(_cs, LOW);
   SPItransfer(OPCODE_READ);
-  SPItransfer((uint8_t)(addr >> 8));
+  if(_addressLengthInBytes > 2) SPItransfer((uint8_t)((addr >> 16) & 0xFF));
+  if(_addressLengthInBytes > 1) SPItransfer((uint8_t)((addr >> 8) & 0xFF));
   SPItransfer((uint8_t)(addr & 0xFF));
   uint8_t x = SPItransfer(0);
   digitalWrite(_cs, HIGH);
