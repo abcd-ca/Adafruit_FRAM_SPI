@@ -82,13 +82,15 @@ boolean Adafruit_FRAM_SPI::begin(void)
   getDeviceID(&manufID, &prodID);
   if (manufID != 0x04)
   {
+    // Ignore manufacturer id so we can use this with any fram chip
     //Serial.print("Unexpected Manufacturer ID: 0x"); Serial.println(manufID, HEX);
-    return false;
+    //return false;
   }
   if (prodID != 0x0302)
   {
+    // Ignore product id so we can use this with any fram chip
     //Serial.print("Unexpected Product ID: 0x"); Serial.println(prodID, HEX);
-    return false;
+    //return false;
   }
 
   /* Everything seems to be properly initialised and connected */
